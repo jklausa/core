@@ -4,4 +4,4 @@ from typing import Final
 
 DOMAIN: Final = "switchbot_cloud"
 ENTRY_TITLE = "SwitchBot Cloud"
-SCAN_INTERVAL = timedelta(seconds=30)
+SCAN_INTERVAL = timedelta(seconds=120)

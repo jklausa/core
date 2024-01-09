@@ -13,7 +13,7 @@ from switchbot_api import (
 
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
-    ATTR_COLOR_TEMP,
+    ATTR_COLOR_TEMP_KELVIN,
     ColorMode,
     LightEntity,
 )
@@ -49,7 +49,7 @@ class SwitchbotCloudLightEntity(SwitchBotCloudEntity, LightEntity):
     _device: SwitchBotCloudEntity
     _attr_name = None
 
-    _attr_supported_color_modes = set(ColorMode.COLOR_TEMP)
+    _attr_supported_color_modes = {ColorMode.COLOR_TEMP}
     _attr_color_mode = ColorMode.COLOR_TEMP
 
     _attr_min_color_temp_kelvin = 2700
@@ -57,28 +57,29 @@ class SwitchbotCloudLightEntity(SwitchBotCloudEntity, LightEntity):
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the device on."""
-        await self.send_command(CommonCommands.ON)
-        self._attr_is_on = True
-
         if ATTR_BRIGHTNESS in kwargs:
             hass_brightness = kwargs[ATTR_BRIGHTNESS]
             brightness = floor(brightness_to_value(BRIGHTNESS_SCALE, hass_brightness))
-
-            self._attr_brightness = hass_brightness
 
             await self.send_command(
                 CeilingLightCommands.SET_BRIGHTNESS, "command", str(brightness)
             )
 
-        if ATTR_COLOR_TEMP in kwargs:
-            self._attr_color_temp = kwargs[ATTR_COLOR_TEMP]
+            self._attr_brightness = hass_brightness
 
+        if ATTR_COLOR_TEMP_KELVIN in kwargs:
             await self.send_command(
-                CeilingLightCommands.SET_COLOR_TEMPERATURE,
+                CeilingLightCommands.SET_COLOR_EMPERATURE,
                 "command",
-                str(kwargs[ATTR_COLOR_TEMP]),
+                str(kwargs[ATTR_COLOR_TEMP_KELVIN]),
             )
 
+            self._attr_color_temp = kwargs[ATTR_COLOR_TEMP_KELVIN]
+
+        if len(kwargs) == 0:
+            await self.send_command(CommonCommands.ON)
+
+        self._attr_is_on = True
         self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs: Any) -> None:

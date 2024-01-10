@@ -69,7 +69,7 @@ class SwitchbotCloudLightEntity(SwitchBotCloudEntity, LightEntity):
 
         if ATTR_COLOR_TEMP_KELVIN in kwargs:
             await self.send_command(
-                CeilingLightCommands.SET_COLOR_EMPERATURE,
+                CeilingLightCommands.SET_COLOR_TEMPERATURE,
                 "command",
                 str(kwargs[ATTR_COLOR_TEMP_KELVIN]),
             )

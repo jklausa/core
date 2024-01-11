@@ -57,24 +57,29 @@ class SwitchbotCloudLightEntity(SwitchBotCloudEntity, LightEntity):
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the device on."""
+
+        if ATTR_COLOR_TEMP_KELVIN in kwargs:
+            color_kelvin = kwargs[ATTR_COLOR_TEMP_KELVIN]
+
+            if color_kelvin != self.color_temp_kelvin:
+                await self.send_command(
+                    CeilingLightCommands.SET_COLOR_TEMPERATURE,
+                    "command",
+                    str(kwargs[ATTR_COLOR_TEMP_KELVIN]),
+                )
+
+            self._attr_color_temp = kwargs[ATTR_COLOR_TEMP_KELVIN]
+
         if ATTR_BRIGHTNESS in kwargs:
             hass_brightness = kwargs[ATTR_BRIGHTNESS]
             brightness = floor(brightness_to_value(BRIGHTNESS_SCALE, hass_brightness))
 
-            await self.send_command(
-                CeilingLightCommands.SET_BRIGHTNESS, "command", str(brightness)
-            )
+            if self.brightness != hass_brightness:
+                await self.send_command(
+                    CeilingLightCommands.SET_BRIGHTNESS, "command", str(brightness)
+                )
 
             self._attr_brightness = hass_brightness
-
-        if ATTR_COLOR_TEMP_KELVIN in kwargs:
-            await self.send_command(
-                CeilingLightCommands.SET_COLOR_TEMPERATURE,
-                "command",
-                str(kwargs[ATTR_COLOR_TEMP_KELVIN]),
-            )
-
-            self._attr_color_temp = kwargs[ATTR_COLOR_TEMP_KELVIN]
 
         if len(kwargs) == 0:
             await self.send_command(CommonCommands.ON)

@@ -86,7 +86,6 @@ class SwitchBotCloudLight(SwitchBotCloudEntity, LightEntity):
         
         # Handle brightness first if provided
         if brightness is not None:
-            self._attr_color_mode = ColorMode.RGB
             await self._send_brightness_command(brightness)
         
         # Handle color adjustments after brightness
@@ -96,9 +95,8 @@ class SwitchBotCloudLight(SwitchBotCloudEntity, LightEntity):
         elif color_temp_kelvin is not None:
             self._attr_color_mode = ColorMode.COLOR_TEMP
             await self._send_color_temperature_command(color_temp_kelvin)
-        
-        # If no parameters provided, just turn on
-        if brightness is None and rgb_color is None and color_temp_kelvin is None:
+        elif brightness is None:
+            # If only brightness or no parameters, use default color mode and turn on
             self._attr_color_mode = ColorMode.RGB
             await self.send_api_command(CommonCommands.ON)
         

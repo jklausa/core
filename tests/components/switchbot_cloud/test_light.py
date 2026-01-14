@@ -304,6 +304,8 @@ async def test_strip_light_turn_on_brightness_and_rgb(
     hass: HomeAssistant, mock_list_devices, mock_get_status
 ) -> None:
     """Test strip light turn on with brightness and RGB color together."""
+    from switchbot_api import RGBWLightCommands
+
     mock_list_devices.return_value = [
         Device(
             version="V1.0",
@@ -337,6 +339,14 @@ async def test_strip_light_turn_on_brightness_and_rgb(
         )
         # Should call brightness first, then RGB color
         assert mock_send_command.call_count == 2
+        # Verify brightness command: 128/255 * 100 = 50
+        mock_send_command.assert_any_call(
+            "light-id-1", RGBWLightCommands.SET_BRIGHTNESS, "50"
+        )
+        # Verify RGB color command (note: BGR order for Strip Light)
+        mock_send_command.assert_any_call(
+            "light-id-1", RGBWLightCommands.SET_COLOR, "64:128:255"
+        )
     state = hass.states.get(entity_id)
     assert state.state is STATE_ON
 
@@ -345,6 +355,8 @@ async def test_rgbww_light_turn_on_brightness_and_color_temp(
     hass: HomeAssistant, mock_list_devices, mock_get_status
 ) -> None:
     """Test rgbww light turn on with brightness and color temperature together."""
+    from switchbot_api import RGBWWLightCommands
+
     mock_list_devices.return_value = [
         Device(
             version="V1.0",
@@ -377,6 +389,14 @@ async def test_rgbww_light_turn_on_brightness_and_color_temp(
         )
         # Should call brightness first, then color temperature
         assert mock_send_command.call_count == 2
+        # Verify brightness command: 192/255 * 100 = 75
+        mock_send_command.assert_any_call(
+            "light-id-1", RGBWWLightCommands.SET_BRIGHTNESS, "75"
+        )
+        # Verify color temperature command
+        mock_send_command.assert_any_call(
+            "light-id-1", RGBWWLightCommands.SET_COLOR_TEMPERATURE, "3500"
+        )
     state = hass.states.get(entity_id)
     assert state.state is STATE_ON
 
@@ -385,6 +405,8 @@ async def test_rgbww_light_turn_on_brightness_and_rgb(
     hass: HomeAssistant, mock_list_devices, mock_get_status
 ) -> None:
     """Test rgbww light turn on with brightness and RGB color together."""
+    from switchbot_api import RGBWWLightCommands
+
     mock_list_devices.return_value = [
         Device(
             version="V1.0",
@@ -422,5 +444,13 @@ async def test_rgbww_light_turn_on_brightness_and_rgb(
         )
         # Should call brightness first, then RGB color
         assert mock_send_command.call_count == 2
+        # Verify brightness command: 153/255 * 100 = 60
+        mock_send_command.assert_any_call(
+            "light-id-1", RGBWWLightCommands.SET_BRIGHTNESS, "60"
+        )
+        # Verify RGB color command (note: RGB order for RGBWW Light)
+        mock_send_command.assert_any_call(
+            "light-id-1", RGBWWLightCommands.SET_COLOR, "100:200:150"
+        )
     state = hass.states.get(entity_id)
     assert state.state is STATE_ON

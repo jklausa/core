@@ -103,7 +103,7 @@ class SwitchBotCloudLight(SwitchBotCloudEntity, LightEntity):
 
         if brightness is not None:
             await self._send_brightness_command(brightness)
-        elif color_temp_kelvin is None and rgb_color is None:
+        elif color_temp_kelvin is None and rgb_color is None and brightness is None:
             # Only send ON if no other parameters were provided
             self._attr_color_mode = self._get_default_color_mode()
             await self.send_api_command(CommonCommands.ON)

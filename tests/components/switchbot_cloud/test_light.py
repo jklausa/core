@@ -355,6 +355,7 @@ async def test_ceiling_light_turn_on(
         )
     state = hass.states.get(entity_id)
     assert state.state is STATE_ON
+    assert state.attributes[ATTR_COLOR_MODE] == ColorMode.UNKNOWN
 
     # Test turn on with color temp
     with patch.object(SwitchBotAPI, "send_command") as mock_send_command:
@@ -372,6 +373,7 @@ async def test_ceiling_light_turn_on(
         )
     state = hass.states.get(entity_id)
     assert state.state is STATE_ON
+    assert state.attributes[ATTR_COLOR_MODE] == ColorMode.COLOR_TEMP
 
     # Test turn on without arguments
     with patch.object(SwitchBotAPI, "send_command") as mock_send_command:

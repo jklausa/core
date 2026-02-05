@@ -3,7 +3,14 @@
 from unittest.mock import patch
 
 import pytest
-from switchbot_api import CeilingLightCommands, CommonCommands, Device, SwitchBotAPI
+from switchbot_api import (
+    CeilingLightCommands,
+    CommonCommands,
+    Device,
+    RGBWLightCommands,
+    RGBWWLightCommands,
+    SwitchBotAPI,
+)
 
 from homeassistant.components.light import (
     ATTR_COLOR_MODE,
@@ -585,6 +592,20 @@ async def test_strip_light_turn_on_with_brightness_and_color(
         )
         # Should be called twice: once for color, once for brightness
         assert mock_send_command.call_count == 2
+        # First call should be SET_COLOR with RGB values
+        mock_send_command.assert_any_call(
+            "light-id-1",
+            RGBWLightCommands.SET_COLOR,
+            "command",
+            "64:128:255",  # Note: order is reversed (BGR format)
+        )
+        # Second call should be SET_BRIGHTNESS
+        mock_send_command.assert_any_call(
+            "light-id-1",
+            RGBWLightCommands.SET_BRIGHTNESS,
+            "command",
+            "50",  # 128/255*100 = 50
+        )
     state = hass.states.get(entity_id)
     assert state.state is STATE_ON
 
@@ -624,6 +645,20 @@ async def test_rgbww_light_turn_on_with_brightness_and_color(
         )
         # Should be called twice: once for color, once for brightness
         assert mock_send_command.call_count == 2
+        # First call should be SET_COLOR with RGB values (not reversed for RGBWW)
+        mock_send_command.assert_any_call(
+            "light-id-1",
+            RGBWWLightCommands.SET_COLOR,
+            "command",
+            "255:128:64",
+        )
+        # Second call should be SET_BRIGHTNESS
+        mock_send_command.assert_any_call(
+            "light-id-1",
+            RGBWWLightCommands.SET_BRIGHTNESS,
+            "command",
+            "50",  # 128/255*100 = 50
+        )
     state = hass.states.get(entity_id)
     assert state.state is STATE_ON
 
@@ -663,5 +698,19 @@ async def test_rgbww_light_turn_on_with_brightness_and_color_temp(
         )
         # Should be called twice: once for color temp, once for brightness
         assert mock_send_command.call_count == 2
+        # First call should be SET_COLOR_TEMPERATURE
+        mock_send_command.assert_any_call(
+            "light-id-1",
+            RGBWWLightCommands.SET_COLOR_TEMPERATURE,
+            "command",
+            "3000",
+        )
+        # Second call should be SET_BRIGHTNESS
+        mock_send_command.assert_any_call(
+            "light-id-1",
+            RGBWWLightCommands.SET_BRIGHTNESS,
+            "command",
+            "50",  # 128/255*100 = 50
+        )
     state = hass.states.get(entity_id)
     assert state.state is STATE_ON

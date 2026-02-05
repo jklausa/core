@@ -80,6 +80,11 @@ class SwitchBotCloudLight(SwitchBotCloudEntity, LightEntity):
             (tuple(int(i) for i in color.split(":"))) if color else None
         )
         self._attr_color_temp_kelvin: int | None = color_temperature or None
+        # Set color mode based on available data
+        if color_temperature is not None:
+            self._attr_color_mode = ColorMode.COLOR_TEMP
+        elif color is not None:
+            self._attr_color_mode = ColorMode.RGB
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the light off."""

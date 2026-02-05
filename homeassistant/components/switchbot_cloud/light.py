@@ -83,12 +83,13 @@ class SwitchBotCloudLight(SwitchBotCloudEntity, LightEntity):
         brightness: int | None = kwargs.get("brightness")
         rgb_color: tuple[int, int, int] | None = kwargs.get("rgb_color")
         color_temp_kelvin: int | None = kwargs.get("color_temp_kelvin")
-        self._attr_color_mode = ColorMode.RGB
+        color_mode: ColorMode | None = None
         if color_temp_kelvin is not None:
-            self._attr_color_mode = ColorMode.COLOR_TEMP
+            color_mode = ColorMode.COLOR_TEMP
         if brightness is not None:
             await self._send_brightness_command(brightness)
         if rgb_color is not None:
+            color_mode = ColorMode.RGB
             await self._send_rgb_color_command(rgb_color)
         if color_temp_kelvin is not None:
             await self._send_color_temperature_command(color_temp_kelvin)
@@ -97,7 +98,10 @@ class SwitchBotCloudLight(SwitchBotCloudEntity, LightEntity):
             and rgb_color is None
             and color_temp_kelvin is None
         ):
+            color_mode = ColorMode.RGB
             await self.send_api_command(CommonCommands.ON)
+        if color_mode is not None:
+            self._attr_color_mode = color_mode
         await asyncio.sleep(AFTER_COMMAND_REFRESH)
         await self.coordinator.async_request_refresh()
 

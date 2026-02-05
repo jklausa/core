@@ -107,6 +107,8 @@ class SwitchBotCloudLight(SwitchBotCloudEntity, LightEntity):
             # Only send ON if no other parameters were provided
             self._attr_color_mode = self._get_default_color_mode()
             await self.send_api_command(CommonCommands.ON)
+
+        self.async_write_ha_state()
         await asyncio.sleep(AFTER_COMMAND_REFRESH)
         await self.coordinator.async_request_refresh()
 

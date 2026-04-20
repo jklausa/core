@@ -548,3 +548,166 @@ async def test_candle_warmer_lamp(
         mock_send_command.assert_called()
     state = hass.states.get(entity_id)
     assert state.state is STATE_ON
+
+
+async def test_strip_light_brightness_and_color(
+    hass: HomeAssistant, mock_list_devices, mock_get_status
+) -> None:
+    """Test strip light turn on with both brightness and color."""
+    mock_list_devices.return_value = [
+        Device(
+            version="V1.0",
+            deviceId="light-id-1",
+            deviceName="light-1",
+            deviceType="Strip Light",
+            hubDeviceId="test-hub-id",
+        ),
+    ]
+    mock_get_status.side_effect = [
+        {"power": "off", "brightness": 1, "color": "0:0:0", "colorTemperature": 4567},
+        {
+            "power": "on",
+            "brightness": 50,
+            "color": "255:128:64",
+            "colorTemperature": 4567,
+        },
+    ]
+    entry = await configure_integration(hass)
+    assert entry.state is ConfigEntryState.LOADED
+    entity_id = "light.light_1"
+    state = hass.states.get(entity_id)
+    assert state.state is STATE_OFF
+
+    # Test turn on with both brightness and rgb_color
+    with patch.object(SwitchBotAPI, "send_command") as mock_send_command:
+        await hass.services.async_call(
+            LIGHT_DOMAIN,
+            SERVICE_TURN_ON,
+            {ATTR_ENTITY_ID: entity_id, "brightness": 128, "rgb_color": (255, 128, 64)},
+            blocking=True,
+        )
+        # Should be called twice: once for color, once for brightness
+        assert mock_send_command.call_count == 2
+    state = hass.states.get(entity_id)
+    assert state.state is STATE_ON
+
+
+async def test_rgbww_light_brightness_and_color(
+    hass: HomeAssistant, mock_list_devices, mock_get_status
+) -> None:
+    """Test rgbww light turn on with both brightness and color."""
+    mock_list_devices.return_value = [
+        Device(
+            version="V1.0",
+            deviceId="light-id-1",
+            deviceName="light-1",
+            deviceType="Strip Light 3",
+            hubDeviceId="test-hub-id",
+        ),
+    ]
+    mock_get_status.side_effect = [
+        {"power": "off", "brightness": 1, "color": "0:0:0", "colorTemperature": 4567},
+        {
+            "power": "on",
+            "brightness": 50,
+            "color": "255:128:64",
+            "colorTemperature": 4567,
+        },
+    ]
+    entry = await configure_integration(hass)
+    assert entry.state is ConfigEntryState.LOADED
+    entity_id = "light.light_1"
+    state = hass.states.get(entity_id)
+    assert state.state is STATE_OFF
+
+    # Test turn on with both brightness and rgb_color
+    with patch.object(SwitchBotAPI, "send_command") as mock_send_command:
+        await hass.services.async_call(
+            LIGHT_DOMAIN,
+            SERVICE_TURN_ON,
+            {ATTR_ENTITY_ID: entity_id, "brightness": 128, "rgb_color": (255, 128, 64)},
+            blocking=True,
+        )
+        # Should be called twice: once for color, once for brightness
+        assert mock_send_command.call_count == 2
+    state = hass.states.get(entity_id)
+    assert state.state is STATE_ON
+
+
+async def test_ceiling_light_brightness_and_color_temp(
+    hass: HomeAssistant, mock_list_devices, mock_get_status
+) -> None:
+    """Test ceiling light turn on with both brightness and color temperature."""
+    mock_list_devices.return_value = [
+        Device(
+            version="V1.0",
+            deviceId="light-id-1",
+            deviceName="light-1",
+            deviceType="Ceiling Light",
+            hubDeviceId="test-hub-id",
+        ),
+    ]
+    mock_get_status.side_effect = [
+        {"power": "off", "brightness": 1, "colorTemperature": 4567},
+        {"power": "on", "brightness": 50, "colorTemperature": 3000},
+    ]
+    entry = await configure_integration(hass)
+    assert entry.state is ConfigEntryState.LOADED
+    entity_id = "light.light_1"
+    state = hass.states.get(entity_id)
+    assert state.state is STATE_OFF
+
+    # Test turn on with both brightness and color_temp_kelvin
+    with patch.object(SwitchBotAPI, "send_command") as mock_send_command:
+        await hass.services.async_call(
+            LIGHT_DOMAIN,
+            SERVICE_TURN_ON,
+            {ATTR_ENTITY_ID: entity_id, "brightness": 128, "color_temp_kelvin": 3000},
+            blocking=True,
+        )
+        # Should be called twice: once for color temp, once for brightness
+        assert mock_send_command.call_count == 2
+    state = hass.states.get(entity_id)
+    assert state.state is STATE_ON
+
+
+async def test_rgbww_light_brightness_and_color_temp(
+    hass: HomeAssistant, mock_list_devices, mock_get_status
+) -> None:
+    """Test rgbww light turn on with both brightness and color temperature."""
+    mock_list_devices.return_value = [
+        Device(
+            version="V1.0",
+            deviceId="light-id-1",
+            deviceName="light-1",
+            deviceType="Strip Light 3",
+            hubDeviceId="test-hub-id",
+        ),
+    ]
+    mock_get_status.side_effect = [
+        {"power": "off", "brightness": 1, "color": "0:0:0", "colorTemperature": 4567},
+        {
+            "power": "on",
+            "brightness": 50,
+            "color": "0:0:0",
+            "colorTemperature": 3000,
+        },
+    ]
+    entry = await configure_integration(hass)
+    assert entry.state is ConfigEntryState.LOADED
+    entity_id = "light.light_1"
+    state = hass.states.get(entity_id)
+    assert state.state is STATE_OFF
+
+    # Test turn on with both brightness and color_temp_kelvin
+    with patch.object(SwitchBotAPI, "send_command") as mock_send_command:
+        await hass.services.async_call(
+            LIGHT_DOMAIN,
+            SERVICE_TURN_ON,
+            {ATTR_ENTITY_ID: entity_id, "brightness": 128, "color_temp_kelvin": 3000},
+            blocking=True,
+        )
+        # Should be called twice: once for color temp, once for brightness
+        assert mock_send_command.call_count == 2
+    state = hass.states.get(entity_id)
+    assert state.state is STATE_ON
